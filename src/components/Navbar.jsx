@@ -21,9 +21,11 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
         {/* Left: Logo */}
         <div className="flex items-center gap-2">
-          <span className="font-extrabold text-2xl tracking-tight text-emerald-900">
-            FARMBIZ
-          </span>
+          <img
+            src="/farmbizz-logo-transparent.png"
+            alt="Farmbiz Logo"
+            className="h-16 w-auto shrink-0"
+          />
         </div>
 
         {/* Centre: Navigation Links */}
@@ -37,10 +39,10 @@ export default function Navbar() {
           <a href="#home" className="hover:text-emerald-700 transition">
             Home
           </a>
-          <a href="#about" className="hover:text-emerald-700 transition">
+          <a href="#why-choose-us" className="hover:text-emerald-700 transition">
             About Us
           </a>
-          <a href="#products" className="hover:text-emerald-700 transition">
+          <a href="#catalog" className="hover:text-emerald-700 transition">
             Products
           </a>
           <a href="#brands" className="hover:text-emerald-700 transition">
@@ -67,9 +69,12 @@ export default function Navbar() {
             <Search className="w-5 h-5" />
           </button>
 
-          <button className="rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white px-6 py-2.5 text-sm font-bold transition shadow-sm cursor-pointer">
+          <a
+            href="#resources"
+            className="rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white px-6 py-2.5 text-sm font-bold transition shadow-sm cursor-pointer"
+          >
             Contact Us
-          </button>
+          </a>
         </div>
       </div>
     </nav>

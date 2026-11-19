@@ -1,23 +1,24 @@
-import {
-  MapPin,
-  Phone,
-  Mail,
-} from "lucide-react";
+import { MapPin, Phone, Mail } from "lucide-react";
 import { PUBLIC_CONTACTS } from "../data/branches";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-stone-950 text-stone-300 pt-20 pb-8 border-t border-stone-800">
+    <footer
+      id="resources"
+      className="bg-stone-950 text-stone-300 pt-20 pb-8 border-t border-stone-800"
+    >
       <div className="max-w-6xl mx-auto px-4">
         {/* Main Footer Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-16">
           {/* Brand & Description (Takes up 2 columns on lg screens) */}
           <div className="lg:col-span-2">
-            <span className="font-extrabold text-2xl tracking-tight text-white mb-4 block">
-              FARMBIZ
-            </span>
+            <img
+              src="/farmbizz-logo-transparent.png"
+              alt="Farmbiz Logo"
+              className="h-16 w-auto shrink-0"
+            />
             <p className="text-sm text-stone-400 leading-relaxed mb-6 max-w-sm">
               "The Business of Farming." Providing a quality and consistent
               service that meets customer expectations and delivers results in

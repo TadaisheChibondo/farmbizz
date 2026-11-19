@@ -20,7 +20,10 @@ export default function Hero() {
   }, [slides.length]);
 
   return (
-    <section className="relative h-screen min-h-[600px] w-full flex items-center justify-center overflow-hidden">
+    <section
+      id="home"
+      className="relative h-screen min-h-[600px] w-full flex items-center justify-center overflow-hidden"
+    >
       {/* Background Slider Setup */}
       {slides.map((slide, index) => (
         <div
@@ -49,7 +52,8 @@ export default function Hero() {
 
         {/* Main Headline */}
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-tight max-w-4xl drop-shadow-md">
-          Growing Agriculture. <br className="hidden sm:block" />
+          <span className="text-emerald-400">Farmbiz:</span> Growing
+          Agriculture. <br className="hidden sm:block" />
           Empowering Farmers.
         </h1>
 
