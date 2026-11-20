@@ -11,48 +11,42 @@ export default function CategoriesSection({ onSelectCategory }) {
       name: "Seeds & Seedlings",
       exactMatch: "Crop Seed & Seedlings",
       description: "Maize, vegetables, small grains and seedlings.",
-      image:
-        "https://images.unsplash.com/photo-1592982537447-6f233400df83?q=80&w=2070&auto=format&fit=crop",
+      image: "/seeds.jpeg",
     },
     {
       id: "fertilizers",
       name: "Fertilizers",
       exactMatch: "Fertilizers",
       description: "Nutritional solutions for improved crop development.",
-      image:
-        "https://images.unsplash.com/photo-1627920769840-692ab8c6d1da?q=80&w=2070&auto=format&fit=crop",
+      image: "fertilizers.jpg",
     },
     {
       id: "crop-protection",
       name: "Crop Protection",
       exactMatch: "Crop Protection",
       description: "Herbicides, pesticides and agricultural chemicals.",
-      image:
-        "https://images.unsplash.com/photo-1563514227147-6d2ff665a6a0?q=80&w=2071&auto=format&fit=crop",
+      image: "/crop-protection.jpeg",
     },
     {
       id: "animal-health",
       name: "Animal Health",
       exactMatch: "Veterinary & Animal Health",
       description: "Veterinary medicines, vaccines and treatments.",
-      image:
-        "https://images.unsplash.com/photo-1511117833895-4b473c0b85d6?q=80&w=2070&auto=format&fit=crop",
+      image: "/for-animals.jpeg",
     },
     {
       id: "stock-feeds",
       name: "Stock Feeds",
       exactMatch: "Stock Feeds",
       description: "Nutrition solutions for livestock.",
-      image:
-        "https://images.unsplash.com/photo-1544421111-66551b68ce48?q=80&w=2070&auto=format&fit=crop",
+      image: "/stockfeeds.jpg",
     },
     {
       id: "farming-equipment",
       name: "Farming Equipment",
       exactMatch: "Tools & Equipment",
       description: "Agricultural tools, implements and protective clothing.",
-      image:
-        "https://images.unsplash.com/photo-1590682680695-43b964a3ae17?q=80&w=1964&auto=format&fit=crop",
+      image: "/farming-equipment.jpg",
     },
   ];
 
