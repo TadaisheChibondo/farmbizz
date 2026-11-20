@@ -34,8 +34,7 @@ export const PRODUCTS = [
     unit: "10kg / 25kg bag",
     summary:
       "Adapted seed lines for varied rainfall zones, supporting strong stand establishment and high yield targets.",
-    image:
-      "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?q=80&w=600&auto=format&fit=crop",
+    image: "/maize seed.jpeg",
     availability: "Contact branch to confirm",
   },
   {
@@ -47,8 +46,31 @@ export const PRODUCTS = [
     unit: "10g / 50g Packet",
     summary:
       "Reliable, disease-resistant tomato variety ideal for open-field market gardening.",
-    image:
-      "https://images.unsplash.com/photo-1592841200221-a6898f307baa?q=80&w=600&auto=format&fit=crop",
+    image: "/tomatoes.jpeg",
+    availability: "Contact branch to confirm",
+  },
+  {
+    id: "seed-sugar-beans",
+    name: "Sugar Beans Seed",
+    category: "Crop Seed & Seedlings",
+    brand: "Seed Co",
+    variety: "Ukulinga",
+    unit: "10kg bag",
+    summary:
+      "Certified sugar bean seed suited to productive planting and reliable harvests.",
+    image: "/beans.jpeg",
+    availability: "Contact branch to confirm",
+  },
+  {
+    id: "seed-sorghum-sv4",
+    name: "Sorghum Seed",
+    category: "Crop Seed & Seedlings",
+    brand: "Farmbiz Genetics",
+    variety: "SV4",
+    unit: "2kg bag",
+    summary:
+      "Certified sorghum seed for farmers looking for a hardy crop suited to drier conditions.",
+    image: "/sorgum.jpeg",
     availability: "Contact branch to confirm",
   },
   {
@@ -60,8 +82,7 @@ export const PRODUCTS = [
     unit: "50kg bag",
     summary:
       "Essential basal fertilizer applied at planting to promote early root development and crop establishment.",
-    image:
-      "https://images.unsplash.com/photo-1627920769840-692ab8c6d1da?q=80&w=600&auto=format&fit=crop",
+    image: "/fertilizers.jpg",
     availability: "Contact branch to confirm",
   },
   {
@@ -73,8 +94,7 @@ export const PRODUCTS = [
     unit: "250g / 1kg",
     summary:
       "Fast-acting, highly effective systemic control against fall armyworm in maize and sorghum.",
-    image:
-      "https://images.unsplash.com/photo-1563514227147-6d2ff665a6a0?q=80&w=600&auto=format&fit=crop",
+    image: "/crop-protection.jpeg",
     availability: "Contact branch to confirm",
   },
   {
@@ -86,8 +106,7 @@ export const PRODUCTS = [
     unit: "500g / 1kg tub",
     summary:
       "High-adhesion tick grease for applying directly to tick-prone areas on cattle to prevent tick-borne diseases.",
-    image:
-      "https://images.unsplash.com/photo-1511117833895-4b473c0b85d6?q=80&w=600&auto=format&fit=crop",
+    image: "/for-animals.jpeg",
     availability: "Contact branch to confirm",
   },
   {
@@ -99,8 +118,19 @@ export const PRODUCTS = [
     unit: "50kg bag",
     summary:
       "Formulated to maximize weight gain and meat quality in the final stages of broiler production.",
-    image:
-      "https://images.unsplash.com/photo-1544421111-66551b68ce48?q=80&w=600&auto=format&fit=crop",
+    image: "/stockfeeds.jpg",
+    availability: "Contact branch to confirm",
+  },
+  {
+    id: "equipment-tractor",
+    name: "Farm Tractor",
+    category: "Tools & Equipment",
+    brand: "Farm Equipment",
+    variety: "Agricultural tractor",
+    unit: "By unit",
+    summary:
+      "A versatile tractor for field preparation and other essential farm operations.",
+    image: "/farming-equipment.jpg",
     availability: "Contact branch to confirm",
   },
 ];

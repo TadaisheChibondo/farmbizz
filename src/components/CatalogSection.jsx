@@ -81,7 +81,12 @@ export default function CatalogSection({
           </div>
 
           {/* Product Grid */}
-          <div className="flex-1">
+          <div
+            className="flex-1 min-w-0 max-h-[70vh] overflow-y-auto overscroll-y-auto pr-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-700"
+            role="region"
+            aria-label="Catalog products"
+            tabIndex={0}
+          >
             {filteredProducts.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-stone-300 p-12 text-center text-stone-500">
                 No products found. Adjust your search or category filter.

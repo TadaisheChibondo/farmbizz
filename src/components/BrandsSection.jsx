@@ -3,15 +3,17 @@ import ScrollReveal from "./ScrollReveal";
 import ScrollItem from "./ScrollItem";
 
 export default function BrandsSection() {
-  // Placeholder array for the brands they stock.
-  // Once the contract is secured, you swap the 'name' out for actual <img> tags of supplier logos.
   const brands = [
-    { id: 1, name: "AgriSeeds" },
-    { id: 2, name: "Seed Co Partners" },
-    { id: 3, name: "Premium Fertilizers" },
+    { id: 1, name: "AgriSeeds", logo: "/agriseeds-logo.webp" },
+    { id: 2, name: "Seed Co Partners", logo: "/seedco-logo.png" },
+    {
+      id: 3,
+      name: "Premium Fertilizers",
+      logo: "/premiumfertilizers_logo.jpg",
+    },
     { id: 4, name: "VetCare Suppliers" },
-    { id: 5, name: "CropProtect Intl." },
-    { id: 6, name: "FarmTech Implements" },
+    { id: 5, name: "CropProtect Intl.", logo: "/cropprotect-logo.png" },
+    { id: 6, name: "FarmTech Implements", logo: "/farmtech-logo.png" },
   ];
 
   return (
@@ -35,17 +37,22 @@ export default function BrandsSection() {
 
         {/* Logos Grid */}
         <ScrollReveal>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {brands.map((brand) => (
-              <ScrollItem key={brand.id}>
-                <div
-                  key={brand.id}
-                  className="bg-white border border-stone-200 rounded-xl h-24 flex items-center justify-center p-4 grayscale hover:grayscale-0 hover:border-emerald-300 hover:shadow-md transition-all duration-500 cursor-pointer group"
-                >
-                  {/* Text acts as a placeholder for a real logo image */}
-                  <span className="font-extrabold text-stone-400 group-hover:text-emerald-700 text-center text-xs md:text-sm uppercase tracking-widest transition-colors duration-500">
-                    {brand.name}
-                  </span>
+              <ScrollItem key={brand.id} className="h-full">
+                <div className="bg-white border border-stone-200 rounded-xl h-32 md:h-36 flex items-center justify-center p-5 shadow-sm hover:border-emerald-300 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
+                  {brand.logo ? (
+                    <img
+                      src={brand.logo}
+                      alt={brand.name}
+                      loading="lazy"
+                      className="w-full h-full object-contain opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300"
+                    />
+                  ) : (
+                    <span className="font-extrabold text-stone-500 group-hover:text-emerald-700 text-center text-sm md:text-base uppercase tracking-widest transition-colors duration-300">
+                      {brand.name}
+                    </span>
+                  )}
                 </div>
               </ScrollItem>
             ))}
@@ -59,7 +66,6 @@ export default function BrandsSection() {
               <Shield className="w-4 h-4 text-emerald-600" />
               Guaranteed authentic agricultural inputs
             </div>
-            ``
           </div>
         </ScrollReveal>
       </div>

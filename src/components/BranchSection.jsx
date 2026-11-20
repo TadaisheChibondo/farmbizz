@@ -9,6 +9,10 @@ import {
   ShieldCheck,
   Building2,
 } from "lucide-react";
+import { TOWNS } from "../data/branches";
+
+const branchLocations = [...TOWNS.slice(1), "Farmbiz Genetics"];
+const filterOptions = ["All Locations", ...branchLocations];
 
 export default function BranchSection() {
   const [activeBranchId, setActiveBranchId] = useState(null);
@@ -59,14 +63,15 @@ export default function BranchSection() {
       hours: "Mon-Fri: 8am - 5pm, Sat: 8am - 1pm",
       coords: { x: "75%", y: "78%" },
     },
-  ];
-
-  const filterOptions = [
-    "All Locations",
-    "Harare",
-    "Bulawayo",
-    "Mutare",
-    "Chiredzi",
+    ...branchLocations
+      .filter(
+        (town) => !["Harare", "Bulawayo", "Mutare", "Chiredzi"].includes(town),
+      )
+      .map((town) => ({
+        id: `location-${town.toLowerCase().replace(/\s+/g, "-")}`,
+        town,
+        name: town === "Farmbiz Genetics" ? town : `${town} Branch`,
+      })),
   ];
 
   // Filter logic: Check town tabs AND the search bar
@@ -76,7 +81,7 @@ export default function BranchSection() {
     const matchesSearch =
       branch.town.toLowerCase().includes(searchTerm.toLowerCase()) ||
       branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      branch.address.toLowerCase().includes(searchTerm.toLowerCase());
+      (branch.address ?? "").toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
@@ -130,7 +135,7 @@ export default function BranchSection() {
                   (b) => b.id === branch.id,
                 );
 
-                if (!isVisible) return null; // Hide markers filtered out by search
+                if (!isVisible || !branch.coords) return null;
 
                 return (
                   <div
@@ -218,7 +223,12 @@ export default function BranchSection() {
             </div>
 
             {/* Town Filters */}
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div
+              className="flex flex-nowrap gap-2 mb-6 overflow-x-auto overscroll-x-contain pb-2"
+              role="region"
+              aria-label="Filter branches by location. Scroll horizontally to view all locations."
+              tabIndex={0}
+            >
               {filterOptions.map((option) => (
                 <button
                   key={option}
@@ -226,7 +236,7 @@ export default function BranchSection() {
                     setSelectedFilter(option);
                     setActiveBranchId(null);
                   }}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors border ${
+                  className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-colors border ${
                     selectedFilter === option
                       ? "bg-stone-800 text-white border-stone-800"
                       : "bg-white text-stone-600 border-stone-200 hover:bg-stone-100"
@@ -286,48 +296,61 @@ export default function BranchSection() {
                       </h3>
 
                       {/* Contact Information */}
-                      <address className="not-italic space-y-3 mb-6">
-                        <div className="flex items-start gap-3 text-sm text-stone-600">
-                          <MapPin className="w-4 h-4 text-stone-400 mt-0.5 shrink-0" />
-                          <span>{branch.address}</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm text-stone-600">
-                          <Phone className="w-4 h-4 text-stone-400 shrink-0" />
-                          {/* tel: link makes the number tap-to-call on mobile */}
-                          <a
-                            href={`tel:${branch.phone.replace(/\s+/g, "")}`}
-                            className="hover:text-emerald-700 hover:underline"
-                          >
-                            {branch.phone}
-                          </a>
-                        </div>
-                        <div className="flex items-start gap-3 text-sm text-stone-600">
-                          <Clock className="w-4 h-4 text-stone-400 mt-0.5 shrink-0" />
-                          <span>{branch.hours}</span>
-                        </div>
-                      </address>
+                      {branch.address || branch.phone || branch.hours ? (
+                        <address className="not-italic space-y-3 mb-6">
+                          {branch.address && (
+                            <div className="flex items-start gap-3 text-sm text-stone-600">
+                              <MapPin className="w-4 h-4 text-stone-400 mt-0.5 shrink-0" />
+                              <span>{branch.address}</span>
+                            </div>
+                          )}
+                          {branch.phone && (
+                            <div className="flex items-center gap-3 text-sm text-stone-600">
+                              <Phone className="w-4 h-4 text-stone-400 shrink-0" />
+                              <a
+                                href={`tel:${branch.phone.replace(/\s+/g, "")}`}
+                                className="hover:text-emerald-700 hover:underline"
+                              >
+                                {branch.phone}
+                              </a>
+                            </div>
+                          )}
+                          {branch.hours && (
+                            <div className="flex items-start gap-3 text-sm text-stone-600">
+                              <Clock className="w-4 h-4 text-stone-400 mt-0.5 shrink-0" />
+                              <span>{branch.hours}</span>
+                            </div>
+                          )}
+                        </address>
+                      ) : (
+                        <p className="mb-6 text-sm text-stone-500">
+                          Address and contact details are not listed yet.
+                        </p>
+                      )}
 
                       {/* Actions */}
-                      <div className="grid grid-cols-2 gap-3">
-                        <a
-                          href={`tel:${branch.phone.replace(/\s+/g, "")}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 hover:text-stone-900 text-sm font-bold transition-colors"
-                        >
-                          <Phone className="w-4 h-4" />
-                          Call Branch
-                        </a>
-                        <a
-                          href={`https://maps.google.com/?q=${encodeURIComponent(branch.address)}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-800 text-white hover:bg-emerald-900 text-sm font-bold transition-colors"
-                        >
-                          <Navigation className="w-4 h-4" />
-                          Get Directions
-                        </a>
-                      </div>
+                      {branch.phone && branch.address && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <a
+                            href={`tel:${branch.phone.replace(/\s+/g, "")}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 hover:text-stone-900 text-sm font-bold transition-colors"
+                          >
+                            <Phone className="w-4 h-4" />
+                            Call Branch
+                          </a>
+                          <a
+                            href={`https://maps.google.com/?q=${encodeURIComponent(branch.address)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-800 text-white hover:bg-emerald-900 text-sm font-bold transition-colors"
+                          >
+                            <Navigation className="w-4 h-4" />
+                            Get Directions
+                          </a>
+                        </div>
+                      )}
                     </div>
                   );
                 })
