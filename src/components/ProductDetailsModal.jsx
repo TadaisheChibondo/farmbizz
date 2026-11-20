@@ -9,19 +9,20 @@ export default function ProductDetailsModal({
   if (!isOpen || !product) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4">
       {/* Modal Container */}
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row relative">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] min-h-0 overflow-hidden flex flex-col md:flex-row relative">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 bg-white/80 backdrop-blur rounded-full p-2 text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition cursor-pointer"
+          aria-label="Close product details"
+          className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 inline-flex min-h-11 min-w-11 items-center justify-center bg-white/90 backdrop-blur rounded-full p-2 text-stone-500 hover:text-stone-900 hover:bg-stone-100 transition cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Left Side: Product Image */}
-        <div className="md:w-2/5 h-64 md:h-auto bg-stone-100 relative">
+        <div className="h-36 shrink-0 sm:h-48 md:h-auto md:w-2/5 bg-stone-100 relative">
           <img
             src={product.image}
             alt={product.name}
@@ -33,15 +34,15 @@ export default function ProductDetailsModal({
         </div>
 
         {/* Right Side: Product Information Table */}
-        <div className="md:w-3/5 p-6 md:p-10 overflow-y-auto">
+        <div className="min-h-0 flex-1 md:w-3/5 p-4 sm:p-6 md:p-10 overflow-y-auto">
           <h2 className="text-2xl md:text-3xl font-extrabold text-stone-900 tracking-tight mb-2">
             {product.name}
           </h2>
           <p className="text-sm text-stone-500 mb-8">{product.summary}</p>
 
           {/* Specification Table - Based directly on the provided layout */}
-          <div className="border border-stone-200 rounded-xl overflow-hidden mb-8">
-            <table className="w-full text-sm text-left">
+          <div className="border border-stone-200 rounded-xl overflow-x-auto mb-8">
+            <table className="w-full table-fixed text-sm text-left">
               <thead className="bg-stone-50 border-b border-stone-200">
                 <tr>
                   <th className="py-3 px-4 font-bold text-stone-900 w-1/3">

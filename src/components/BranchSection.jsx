@@ -140,7 +140,7 @@ export default function BranchSection() {
                 return (
                   <div
                     key={branch.id}
-                    className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group z-10"
+                    className="absolute flex min-h-11 min-w-11 items-center justify-center transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group z-10"
                     style={{ left: branch.coords.x, top: branch.coords.y }}
                     onClick={() =>
                       setActiveBranchId(isActive ? null : branch.id)
@@ -180,18 +180,18 @@ export default function BranchSection() {
             </div>
 
             {/* Location Statistics Row */}
-            <div className="grid grid-cols-3 gap-4 mt-6 bg-white border border-stone-200 rounded-xl p-6 shadow-sm">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-6 bg-white border border-stone-200 rounded-xl p-3 sm:p-6 shadow-sm">
               <div className="text-center border-r border-stone-100">
                 <span className="block text-2xl font-black text-emerald-800">
                   13+
                 </span>
-                <span className="text-xs text-stone-500 font-semibold uppercase tracking-wider mt-1 block">
+                <span className="text-[10px] sm:text-xs text-stone-500 font-semibold uppercase tracking-wider mt-1 block">
                   Locations*
                 </span>
               </div>
               <div className="text-center border-r border-stone-100 flex flex-col items-center justify-center">
                 <ShieldCheck className="w-6 h-6 text-emerald-600 mb-1" />
-                <span className="text-xs text-stone-600 font-semibold leading-tight">
+                <span className="text-[10px] sm:text-xs text-stone-600 font-semibold leading-tight">
                   Nationwide
                   <br />
                   Coverage
@@ -199,7 +199,7 @@ export default function BranchSection() {
               </div>
               <div className="text-center flex flex-col items-center justify-center">
                 <CheckCircle2 className="w-6 h-6 text-emerald-600 mb-1" />
-                <span className="text-xs text-stone-600 font-semibold leading-tight">
+                <span className="text-[10px] sm:text-xs text-stone-600 font-semibold leading-tight">
                   Serving Farmers
                   <br />
                   Since 2016
@@ -209,7 +209,7 @@ export default function BranchSection() {
           </div>
 
           {/* RIGHT COLUMN: Directory & Filters */}
-          <div className="lg:col-span-5 flex flex-col h-[650px]">
+          <div className="lg:col-span-5 flex flex-col lg:h-[650px]">
             {/* Search Field */}
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
@@ -236,7 +236,7 @@ export default function BranchSection() {
                     setSelectedFilter(option);
                     setActiveBranchId(null);
                   }}
-                  className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-colors border ${
+                  className={`shrink-0 min-h-11 px-4 py-2 rounded-full text-xs font-bold transition-colors border ${
                     selectedFilter === option
                       ? "bg-stone-800 text-white border-stone-800"
                       : "bg-white text-stone-600 border-stone-200 hover:bg-stone-100"
@@ -248,7 +248,7 @@ export default function BranchSection() {
             </div>
 
             {/* Scrollable Branch Directory */}
-            <div className="flex-1 overflow-y-auto pr-2 space-y-4 pb-4 custom-scrollbar">
+            <div className="space-y-4 pb-4 pr-2 lg:flex-1 lg:min-h-0 lg:overflow-y-auto custom-scrollbar">
               {visibleBranches.length === 0 ? (
                 <div className="text-center p-8 bg-white rounded-xl border border-stone-200">
                   <p className="text-stone-500 text-sm">
@@ -334,7 +334,7 @@ export default function BranchSection() {
                           <a
                             href={`tel:${branch.phone.replace(/\s+/g, "")}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 hover:text-stone-900 text-sm font-bold transition-colors"
+                            className="flex min-h-11 items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 hover:text-stone-900 text-sm font-bold transition-colors"
                           >
                             <Phone className="w-4 h-4" />
                             Call Branch
@@ -344,7 +344,7 @@ export default function BranchSection() {
                             target="_blank"
                             rel="noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-800 text-white hover:bg-emerald-900 text-sm font-bold transition-colors"
+                            className="flex min-h-11 items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-800 text-white hover:bg-emerald-900 text-sm font-bold transition-colors"
                           >
                             <Navigation className="w-4 h-4" />
                             Get Directions

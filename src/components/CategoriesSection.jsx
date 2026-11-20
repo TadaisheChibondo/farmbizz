@@ -1,6 +1,5 @@
 import { ArrowRight } from "lucide-react";
 import ScrollReveal from "./ScrollReveal";
-import ScrollItem from "./ScrollItem";
 
 export default function CategoriesSection({ onSelectCategory }) {
   // The 'exactMatch' field matches the CATEGORIES array in catalog.js perfectly
@@ -105,22 +104,6 @@ export default function CategoriesSection({ onSelectCategory }) {
           </div>
         </ScrollReveal>
 
-        {/* Wrap the Grid in a Staggered ScrollReveal */}
-        <ScrollReveal stagger={true}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {categories.map((category) => (
-              // Wrap each card in a ScrollItem
-              <ScrollItem key={category.id}>
-                <button
-                  onClick={() => onSelectCategory(category.exactMatch)}
-                  className="text-left group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-stone-100 flex flex-col cursor-pointer w-full"
-                >
-                  {/* ... rest of the card content remains exactly the same ... */}
-                </button>
-              </ScrollItem>
-            ))}
-          </div>
-        </ScrollReveal>
       </div>
     </section>
   );

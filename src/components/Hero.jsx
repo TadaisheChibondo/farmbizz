@@ -22,7 +22,7 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative h-screen min-h-[600px] w-full flex items-center justify-center overflow-hidden"
+      className="relative min-h-screen min-h-[100svh] w-full flex items-center justify-center overflow-hidden py-24 sm:py-28"
     >
       {/* Background Slider Setup */}
       {slides.map((slide, index) => (
@@ -44,7 +44,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-black/60 z-10"></div>
 
       {/* Hero Content - relative and z-20 to sit above the background and overlay */}
-      <div className="relative z-20 max-w-6xl mx-auto px-4 w-full text-center flex flex-col items-center mt-16">
+      <div className="relative z-20 max-w-6xl mx-auto px-4 w-full text-center flex flex-col items-center">
         {/* Established Slogan */}
         <span className="text-emerald-400 font-bold tracking-widest uppercase text-sm md:text-base mb-4 drop-shadow-sm">
           The Business of Farming
@@ -84,18 +84,23 @@ export default function Hero() {
         </div>
 
         {/* Manual Slide Indicators (Dots) */}
-        <div className="absolute -bottom-24 sm:-bottom-32 flex gap-2">
+        <div className="mt-8 flex gap-1">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentSlide
-                  ? "bg-emerald-500 w-6"
-                  : "bg-white/50 hover:bg-white/80"
-              }`}
+              aria-current={index === currentSlide ? "true" : undefined}
               aria-label={`Go to slide ${index + 1}`}
-            />
+              className="inline-flex min-h-11 min-w-11 items-center justify-center"
+            >
+              <span
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  index === currentSlide
+                    ? "bg-emerald-500 w-6"
+                    : "bg-white/50 hover:bg-white/80 w-2"
+                }`}
+              />
+            </button>
           ))}
         </div>
       </div>

@@ -67,7 +67,7 @@ export default function CatalogSection({
                   <button
                     key={category}
                     onClick={() => setActiveCategory(category)}
-                    className={`px-4 py-2.5 rounded-lg text-left text-sm font-medium transition cursor-pointer ${
+                    className={`min-h-11 px-4 py-2.5 rounded-lg text-left text-sm font-medium transition cursor-pointer ${
                       active
                         ? "bg-emerald-800 text-white shadow-sm"
                         : "bg-transparent text-stone-600 hover:bg-stone-100"
@@ -82,7 +82,7 @@ export default function CatalogSection({
 
           {/* Product Grid */}
           <div
-            className="flex-1 min-w-0 max-h-[70vh] overflow-y-auto overscroll-y-auto pr-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-700"
+            className="flex-1 min-w-0 max-h-none overflow-visible pr-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-700 lg:max-h-[70vh] lg:overflow-y-auto lg:overscroll-y-auto lg:pr-2"
             role="region"
             aria-label="Catalog products"
             tabIndex={0}
@@ -130,14 +130,14 @@ export default function CatalogSection({
                       <div className="grid grid-cols-2 gap-2 mt-auto">
                         <button
                           onClick={() => openDetails(item)}
-                          className="flex items-center justify-center gap-1.5 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-xs font-bold py-2.5 transition cursor-pointer"
+                          className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-xs font-bold py-2.5 transition cursor-pointer"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           View Details
                         </button>
                         <button
                           onClick={() => onAddToQuote(item)}
-                          className="flex items-center justify-center gap-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold py-2.5 transition cursor-pointer"
+                          className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold py-2.5 transition cursor-pointer"
                         >
                           <PlusCircle className="w-3.5 h-3.5" />
                           Quote

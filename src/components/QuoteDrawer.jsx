@@ -31,7 +31,7 @@ export default function QuoteDrawer({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex justify-end">
-      <div className="w-full max-w-md bg-white h-full p-6 flex flex-col justify-between overflow-y-auto shadow-xl">
+      <div className="w-full max-w-md bg-white h-full p-4 sm:p-6 flex flex-col justify-between overflow-y-auto shadow-xl">
         <div>
           <div className="flex items-center justify-between pb-4 border-b border-stone-200">
             <h3 className="text-lg font-bold text-stone-900">
@@ -39,7 +39,8 @@ export default function QuoteDrawer({
             </h3>
             <button
               onClick={onClose}
-              className="p-1 text-stone-500 hover:text-stone-800 cursor-pointer"
+              aria-label="Close quote drawer"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center text-stone-500 hover:text-stone-800 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -83,7 +84,7 @@ export default function QuoteDrawer({
                     </div>
                     <button
                       onClick={() => onRemove(idx)}
-                      className="text-stone-400 hover:text-red-600 p-1 cursor-pointer"
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center text-stone-400 hover:text-red-600 cursor-pointer"
                       aria-label={`Remove ${item.name}`}
                     >
                       <Trash2 className="w-4 h-4" />

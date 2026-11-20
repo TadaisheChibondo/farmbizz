@@ -1,14 +1,35 @@
 import { useState, useEffect } from "react";
-import { Search } from "lucide-react";
+import { Menu, Search, X } from "lucide-react";
+
+const navigationLinks = [
+  { label: "Home", href: "#home" },
+  { label: "About Us", href: "#why-choose-us" },
+  { label: "Products", href: "#catalog" },
+  { label: "Brands", href: "#brands" },
+  { label: "Branches", href: "#branches" },
+  { label: "Resources", href: "#resources" },
+];
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isMenuOpen]);
 
   return (
     <nav
@@ -24,7 +45,7 @@ export default function Navbar() {
           <img
             src="/farmbizz-logo-transparent.png"
             alt="Farmbiz Logo"
-            className="h-16 w-auto shrink-0"
+            className="h-12 sm:h-14 md:h-16 w-auto shrink-0"
           />
         </div>
 
@@ -36,28 +57,19 @@ export default function Navbar() {
               : "text-white group-hover:text-stone-900"
           }`}
         >
-          <a href="#home" className="hover:text-emerald-700 transition">
-            Home
-          </a>
-          <a href="#why-choose-us" className="hover:text-emerald-700 transition">
-            About Us
-          </a>
-          <a href="#catalog" className="hover:text-emerald-700 transition">
-            Products
-          </a>
-          <a href="#brands" className="hover:text-emerald-700 transition">
-            Brands
-          </a>
-          <a href="#branches" className="hover:text-emerald-700 transition">
-            Branches
-          </a>
-          <a href="#resources" className="hover:text-emerald-700 transition">
-            Resources
-          </a>
+          {navigationLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="hover:text-emerald-700 transition"
+            >
+              {link.label}
+            </a>
+          ))}
         </div>
 
         {/* Right: Search & Contact Button */}
-        <div className="flex items-center gap-5">
+        <div className="hidden md:flex items-center gap-5">
           <button
             aria-label="Search"
             className={`hover:text-emerald-700 transition cursor-pointer p-1 ${
@@ -72,6 +84,48 @@ export default function Navbar() {
           <a
             href="#resources"
             className="rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white px-6 py-2.5 text-sm font-bold transition shadow-sm cursor-pointer"
+          >
+            Contact Us
+          </a>
+        </div>
+
+        <button
+          type="button"
+          aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-navigation"
+          onClick={() => setIsMenuOpen((open) => !open)}
+          className={`md:hidden inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg transition ${
+            isScrolled
+              ? "text-stone-900 hover:bg-stone-100"
+              : "text-white hover:bg-white/10"
+          }`}
+        >
+          {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+      </div>
+
+      <div
+        id="mobile-navigation"
+        className={`md:hidden border-t border-stone-200 bg-white shadow-lg ${
+          isMenuOpen ? "block" : "hidden"
+        }`}
+      >
+        <div className="mx-auto max-w-6xl px-4 py-3">
+          {navigationLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => setIsMenuOpen(false)}
+              className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-stone-800 hover:bg-stone-100"
+            >
+              {link.label}
+            </a>
+          ))}
+          <a
+            href="#resources"
+            onClick={() => setIsMenuOpen(false)}
+            className="mt-2 flex min-h-11 items-center justify-center rounded-lg bg-emerald-800 px-4 text-sm font-bold text-white hover:bg-emerald-900"
           >
             Contact Us
           </a>
