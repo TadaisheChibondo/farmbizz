@@ -21,6 +21,7 @@ import {
   LocateFixed,
   Loader2,
   X,
+  ChevronDown,
 } from "lucide-react";
 import { TOWNS } from "../data/branches";
 
@@ -28,9 +29,6 @@ import { TOWNS } from "../data/branches";
 /* Map configuration                                                          */
 /* -------------------------------------------------------------------------- */
 
-// Tile source. OpenStreetMap's public server is fine for a prototype, but its
-// policy is for light use. Before going live, set VITE_MAP_TILE_URL (and
-// VITE_MAP_ATTRIBUTION) in your .env to a provider you have an account with.
 const TILE_URL =
   import.meta.env.VITE_MAP_TILE_URL ||
   "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -38,19 +36,15 @@ const TILE_ATTRIBUTION =
   import.meta.env.VITE_MAP_ATTRIBUTION ||
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
-// Rough bounding box of Zimbabwe: [[south, west], [north, east]]
 const ZIM_BOUNDS = [
   [-22.5, 25.2],
   [-15.5, 33.1],
 ];
-// How far the map can be panned (a little wider than Zimbabwe)
 const MAX_BOUNDS = [
   [-24.5, 23.0],
   [-13.5, 35.5],
 ];
 
-// If the visitor is further than this from every branch, we don't use their
-// location (they're probably abroad, and a 1,500 km "nearest" isn't useful).
 const FAR_KM = 600;
 
 /* -------------------------------------------------------------------------- */
@@ -60,9 +54,6 @@ const FAR_KM = 600;
 const branchLocations = [...TOWNS.slice(1), "Farmbiz Genetics"];
 const filterOptions = ["All Locations", ...branchLocations];
 
-// TODO: lat/lng below are approximate town-centre points. For the client demo,
-// replace each with the exact spot: open the address in Google Maps,
-// right-click the pin, click the coordinates to copy them.
 const BRANCHES = [
   {
     id: "hre-hq",
@@ -108,7 +99,6 @@ const BRANCHES = [
     lat: -21.05,
     lng: 31.667,
   },
-  // Branches without full details yet: listed in the directory, not on the map
   ...branchLocations
     .filter(
       (town) => !["Harare", "Bulawayo", "Mutare", "Chiredzi"].includes(town),
@@ -129,7 +119,6 @@ const MAPPED = BRANCHES.filter(hasCoords);
 
 const toRad = (deg) => (deg * Math.PI) / 180;
 
-// Straight-line (great-circle) distance in km
 function distanceKm(a, b) {
   const R = 6371;
   const dLat = toRad(b.lat - a.lat);
@@ -153,8 +142,6 @@ function directionsUrl(branch) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branch.address)}`;
 }
 
-// Teardrop pin as a Leaflet divIcon, so it matches the site's emerald palette.
-// Icons are cached so markers don't get a new icon object on every render.
 const iconCache = {};
 function getPinIcon(isActive, isHeadOffice) {
   const key = `${isActive}-${isHeadOffice}`;
@@ -170,7 +157,7 @@ function getPinIcon(isActive, isHeadOffice) {
     iconCache[key] = L.divIcon({
       className: "",
       iconSize: [36, 44],
-      iconAnchor: [18, 44], // the tip of the pin sits exactly on the coordinate
+      iconAnchor: [18, 44],
       tooltipAnchor: [0, -40],
       html: `<svg width="36" height="44" viewBox="0 0 36 44" aria-hidden="true"
         style="transform:scale(${scale});transform-origin:50% 100%;transition:transform .2s;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))">
@@ -182,7 +169,6 @@ function getPinIcon(isActive, isHeadOffice) {
   return iconCache[key];
 }
 
-// Pulsing dot for the visitor's own location
 const userIcon = L.divIcon({
   className: "",
   iconSize: [18, 18],
@@ -194,12 +180,24 @@ const userIcon = L.divIcon({
 });
 
 /* -------------------------------------------------------------------------- */
-/* Map controller: moves the map when selection, filters or location change   */
+/* Map controller: moves & resizes map cleanly across breakpoints              */
 /* -------------------------------------------------------------------------- */
 
 function MapController({ activeBranch, points, userPos, fitWithUser }) {
   const map = useMap();
   const firstRun = useRef(true);
+
+  useEffect(() => {
+    const container = map.getContainer();
+    if (!container || typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(() => {
+      map.invalidateSize({ animate: false });
+    });
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, [map]);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia?.(
@@ -219,7 +217,6 @@ function MapController({ activeBranch, points, userPos, fitWithUser }) {
 
     if (activeBranch) {
       if (fitWithUser && userPos) {
-        // Show the visitor and their nearest branch together
         fit(
           L.latLngBounds([
             [userPos.lat, userPos.lng],
@@ -259,17 +256,17 @@ export default function BranchSection() {
   const [activeBranchId, setActiveBranchId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All Locations");
+  const [showAllBranches, setShowAllBranches] = useState(false);
+  const [mobileView, setMobileView] = useState("list");
 
-  // Nearest-branch feature
   const [userPos, setUserPos] = useState(null);
   const [nearestId, setNearestId] = useState(null);
   const [fitWithUser, setFitWithUser] = useState(false);
   const [locating, setLocating] = useState(false);
-  const [geoNotice, setGeoNotice] = useState(null); // { tone: "error" | "info", text }
+  const [geoNotice, setGeoNotice] = useState(null);
 
   const cardRefs = useRef({});
 
-  // Distance from the visitor to every branch that has coordinates
   const distances = useMemo(() => {
     if (!userPos) return {};
     return Object.fromEntries(
@@ -277,8 +274,6 @@ export default function BranchSection() {
     );
   }, [userPos]);
 
-  // Filter logic: town tabs AND the search bar. Sorted by distance once we
-  // know where the visitor is (branches without coordinates go last).
   const visibleBranches = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     const list = BRANCHES.filter((branch) => {
@@ -305,20 +300,19 @@ export default function BranchSection() {
     () => visibleBranches.filter(hasCoords),
     [visibleBranches],
   );
+  const displayedBranches = showAllBranches
+    ? visibleBranches
+    : visibleBranches.slice(0, 5);
 
   const activeBranch =
     mappedVisible.find((b) => b.id === activeBranchId) ?? null;
   const nearestBranch = MAPPED.find((b) => b.id === nearestId) ?? null;
 
-  // Select a branch (from a card or a pin). Picking one manually ends the
-  // "show me and my nearest branch" view.
   const selectBranch = (id, { toggle = false } = {}) => {
     setFitWithUser(false);
     setActiveBranchId((current) => (toggle && current === id ? null : id));
   };
 
-  // Scroll the directory to the active card (desktop only: on phones the list
-  // sits below the map and jumping the page would be jarring)
   useEffect(() => {
     if (!activeBranchId) return;
     if (!window.matchMedia("(min-width: 1024px)").matches) return;
@@ -369,13 +363,13 @@ export default function BranchSection() {
           return;
         }
 
-        // Make sure the nearest branch isn't hidden by an active filter
         setSearchTerm("");
         setSelectedFilter("All Locations");
         setUserPos(here);
         setNearestId(nearest.branch.id);
         setActiveBranchId(nearest.branch.id);
         setFitWithUser(true);
+        setShowAllBranches(false);
       },
       (error) => {
         setLocating(false);
@@ -396,30 +390,101 @@ export default function BranchSection() {
   return (
     <section
       id="branches"
-      className="py-20 bg-stone-50 border-y border-stone-200"
+      className="py-10 sm:py-16 lg:py-20 bg-stone-50 border-y border-stone-200"
     >
       <div className="max-w-7xl mx-auto px-4">
         {/* Section Heading */}
-        <div className="mb-12">
-          <p className="text-emerald-700 font-semibold tracking-wide uppercase text-sm mb-2 flex items-center gap-2">
+        <div className="mb-6 sm:mb-10 lg:mb-12">
+          <p className="text-emerald-700 font-semibold tracking-wide uppercase text-xs sm:text-sm mb-1.5 sm:mb-2 flex items-center gap-2">
             <MapPin className="w-4 h-4" /> Our Nationwide Presence
           </p>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-stone-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-stone-900 tracking-tight">
             Find a Farmbiz branch near you.
           </h2>
         </div>
 
-        {/* Two-Column Directory Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-          {/* LEFT COLUMN: Map & Statistics */}
-          <div className="lg:col-span-7 flex flex-col">
-            {/* Nearest-branch control + status */}
-            <div className="mb-4 flex flex-wrap items-center gap-3">
+        {/* Responsive Layout:
+            Mobile (< lg): 1. Search & Filters -> 2. Map & Stats -> 3. Branch Cards
+            Desktop (lg+): Left 7 cols = Map & Stats; Right 5 cols = Search & Filters above Directory */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 lg:gap-x-12 lg:gap-y-0">
+          {/* 1. SEARCH & LOCATION FILTERS */}
+          <div className="order-1 lg:order-none lg:col-start-8 lg:col-span-5 lg:row-start-1 flex flex-col">
+            <div className="relative mb-3 sm:mb-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+              <input
+                type="text"
+                placeholder="Search by town or branch name..."
+                aria-label="Search branches by town or name"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setShowAllBranches(false);
+                }}
+                className="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-xl border border-stone-200 bg-white focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all text-sm"
+              />
+            </div>
+
+            <div
+              className="flex flex-nowrap gap-2 overflow-x-auto overscroll-x-contain pb-1 sm:pb-2 lg:mb-4"
+              role="region"
+              aria-label="Filter branches by location. Scroll horizontally to view all locations."
+              tabIndex={0}
+            >
+              {filterOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => {
+                    setSelectedFilter(option);
+                    setActiveBranchId(null);
+                    setFitWithUser(false);
+                    setShowAllBranches(false);
+                  }}
+                  className={`shrink-0 min-h-10 sm:min-h-11 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold transition-colors border cursor-pointer ${
+                    selectedFilter === option
+                      ? "bg-stone-800 text-white border-stone-800"
+                      : "bg-white text-stone-600 border-stone-200 hover:bg-stone-100"
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+
+            <div
+              className="grid grid-cols-2 gap-2 lg:hidden"
+              role="group"
+              aria-label="Choose branch directory view"
+            >
+              {[
+                { id: "list", label: "List" },
+                { id: "map", label: "Map" },
+              ].map((view) => (
+                <button
+                  key={view.id}
+                  type="button"
+                  aria-pressed={mobileView === view.id}
+                  onClick={() => setMobileView(view.id)}
+                  className={`min-h-10 rounded-lg border px-3 py-2 text-sm font-bold transition-colors ${
+                    mobileView === view.id
+                      ? "border-emerald-800 bg-emerald-800 text-white"
+                      : "border-stone-200 bg-white text-stone-700"
+                  }`}
+                >
+                  {view.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 2. MAP, NEAREST CONTROL & STATISTICS */}
+          <div className={`${mobileView === "map" ? "flex" : "hidden lg:flex"} order-2 lg:order-none lg:col-start-1 lg:col-span-7 lg:row-start-1 lg:row-span-2 flex-col`}>
+            <div className="mb-3 sm:mb-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2.5 sm:gap-3">
               <button
                 type="button"
                 onClick={handleFindNearest}
                 disabled={locating}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-emerald-800 px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-emerald-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-wait disabled:opacity-70"
+                className="inline-flex w-full sm:w-auto min-h-12 sm:min-h-11 items-center justify-center gap-2 rounded-full bg-emerald-800 px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-emerald-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 disabled:cursor-wait disabled:opacity-70 cursor-pointer"
               >
                 {locating ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -433,33 +498,31 @@ export default function BranchSection() {
                 <button
                   type="button"
                   onClick={clearLocation}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition-colors hover:bg-stone-100"
+                  className="inline-flex w-full sm:w-auto min-h-10 sm:min-h-11 items-center justify-center gap-1.5 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition-colors hover:bg-stone-100 cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                   Clear location
                 </button>
               )}
 
-              <p
-                role="status"
-                aria-live="polite"
-                className={`text-sm ${
-                  geoNotice?.tone === "error"
-                    ? "text-red-700"
-                    : "text-stone-600"
-                }`}
-              >
-                {geoNotice
-                  ? geoNotice.text
-                  : userPos && nearestBranch
-                    ? `Nearest to you: ${nearestBranch.name}, about ${formatKm(distances[nearestBranch.id])} away in a straight line.`
-                    : ""}
-              </p>
+              {(geoNotice || (userPos && nearestBranch)) && (
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className={`text-xs sm:text-sm ${
+                    geoNotice?.tone === "error"
+                      ? "text-red-700"
+                      : "text-stone-600"
+                  }`}
+                >
+                  {geoNotice
+                    ? geoNotice.text
+                    : `Nearest to you: ${nearestBranch.name}, about ${formatKm(distances[nearestBranch.id])} away in a straight line.`}
+                </p>
+              )}
             </div>
 
-            {/* Interactive map (isolate keeps Leaflet's z-indexes from
-                leaking over your navbar or modals) */}
-            <div className="relative isolate w-full aspect-square md:aspect-[4/3] bg-stone-100 rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+            <div className="relative isolate w-full h-[280px] sm:h-[340px] md:h-auto md:aspect-[4/3] bg-stone-100 rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
               <MapContainer
                 bounds={ZIM_BOUNDS}
                 maxBounds={MAX_BOUNDS}
@@ -467,8 +530,8 @@ export default function BranchSection() {
                 minZoom={5}
                 maxZoom={17}
                 zoomSnap={0.5}
-                scrollWheelZoom={false} // don't hijack page scrolling
-                dragging={!L.Browser.mobile} // phones: one finger scrolls the page, two fingers move the map
+                scrollWheelZoom={false}
+                dragging={!L.Browser.mobile}
                 className="h-full w-full"
                 aria-label="Map of Farmbiz branch locations in Zimbabwe"
               >
@@ -481,7 +544,6 @@ export default function BranchSection() {
                   fitWithUser={fitWithUser}
                 />
 
-                {/* Line from the visitor to their nearest branch */}
                 {userPos && fitWithUser && activeBranch && (
                   <Polyline
                     positions={[
@@ -539,9 +601,9 @@ export default function BranchSection() {
             </div>
 
             {/* Location Statistics Row */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-6 bg-white border border-stone-200 rounded-xl p-3 sm:p-6 shadow-sm">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-4 sm:mt-6 bg-white border border-stone-200 rounded-xl p-3 sm:p-6 shadow-sm">
               <div className="text-center border-r border-stone-100">
-                <span className="block text-2xl font-black text-emerald-800">
+                <span className="block text-xl sm:text-2xl font-black text-emerald-800">
                   13+
                 </span>
                 <span className="text-[10px] sm:text-xs text-stone-500 font-semibold uppercase tracking-wider mt-1 block">
@@ -549,7 +611,7 @@ export default function BranchSection() {
                 </span>
               </div>
               <div className="text-center border-r border-stone-100 flex flex-col items-center justify-center">
-                <ShieldCheck className="w-6 h-6 text-emerald-600 mb-1" />
+                <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 mb-1" />
                 <span className="text-[10px] sm:text-xs text-stone-600 font-semibold leading-tight">
                   Nationwide
                   <br />
@@ -557,7 +619,7 @@ export default function BranchSection() {
                 </span>
               </div>
               <div className="text-center flex flex-col items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 text-emerald-600 mb-1" />
+                <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 mb-1" />
                 <span className="text-[10px] sm:text-xs text-stone-600 font-semibold leading-tight">
                   Serving Farmers
                   <br />
@@ -567,66 +629,28 @@ export default function BranchSection() {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Directory & Filters */}
-          <div className="lg:col-span-5 flex flex-col lg:h-[650px]">
-            {/* Search Field */}
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
-              <input
-                type="text"
-                placeholder="Search by town or branch name..."
-                aria-label="Search branches by town or name"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all text-sm"
-              />
-            </div>
-
-            {/* Town Filters */}
-            <div
-              className="flex flex-nowrap gap-2 mb-6 overflow-x-auto overscroll-x-contain pb-2"
-              role="region"
-              aria-label="Filter branches by location. Scroll horizontally to view all locations."
-              tabIndex={0}
-            >
-              {filterOptions.map((option) => (
-                <button
-                  key={option}
-                  onClick={() => {
-                    setSelectedFilter(option);
-                    setActiveBranchId(null);
-                    setFitWithUser(false);
-                  }}
-                  className={`shrink-0 min-h-11 px-4 py-2 rounded-full text-xs font-bold transition-colors border ${
-                    selectedFilter === option
-                      ? "bg-stone-800 text-white border-stone-800"
-                      : "bg-white text-stone-600 border-stone-200 hover:bg-stone-100"
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-
-            {/* Scrollable Branch Directory */}
-            <div className="space-y-4 pb-4 pr-2 lg:flex-1 lg:min-h-0 lg:overflow-y-auto custom-scrollbar">
+          {/* 3. BRANCH CARDS LIST */}
+          <div className={`${mobileView === "list" ? "flex" : "hidden lg:flex"} order-3 lg:order-none lg:col-start-8 lg:col-span-5 lg:row-start-2 flex-col lg:h-[530px]`}>
+            <div className="space-y-3 sm:space-y-4 pb-2 sm:pb-4 lg:pr-2 lg:flex-1 lg:min-h-0 lg:overflow-y-auto custom-scrollbar">
               {visibleBranches.length === 0 ? (
-                <div className="text-center p-8 bg-white rounded-xl border border-stone-200">
+                <div className="text-center p-6 sm:p-8 bg-white rounded-xl border border-stone-200">
                   <p className="text-stone-500 text-sm">
                     No branches found matching your search.
                   </p>
                   <button
+                    type="button"
                     onClick={() => {
                       setSearchTerm("");
                       setSelectedFilter("All Locations");
+                      setShowAllBranches(false);
                     }}
-                    className="mt-4 text-emerald-700 text-sm font-semibold hover:underline cursor-pointer"
+                    className="mt-3 text-emerald-700 text-sm font-semibold hover:underline cursor-pointer"
                   >
                     Clear filters
                   </button>
                 </div>
               ) : (
-                visibleBranches.map((branch) => {
+                displayedBranches.map((branch) => {
                   const isActive = activeBranchId === branch.id;
                   const isNearest = userPos && nearestId === branch.id;
                   const km = distances[branch.id];
@@ -635,103 +659,126 @@ export default function BranchSection() {
                     <div
                       key={branch.id}
                       ref={(el) => (cardRefs.current[branch.id] = el)}
-                      onClick={() => selectBranch(branch.id)}
-                      className={`p-5 rounded-xl border transition-all duration-300 cursor-pointer ${
+                      className={`p-3.5 sm:p-4 rounded-xl border transition-all duration-300 ${
                         isActive
                           ? "border-emerald-500 bg-emerald-50/30 ring-4 ring-emerald-500/10 shadow-md"
                           : "border-stone-200 bg-white hover:border-emerald-300 hover:shadow-sm"
                       }`}
                     >
-                      {/* Branch Hierarchy Header */}
-                      <div className="flex justify-between items-start gap-2 mb-2">
-                        <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
-                          {branch.town}
-                          {km !== undefined && (
-                            <span className="ml-2 font-semibold normal-case tracking-normal text-stone-500">
-                              {formatKm(km)} away
-                            </span>
-                          )}
+                      <button
+                        type="button"
+                        aria-expanded={isActive}
+                        aria-controls={`branch-details-${branch.id}`}
+                        onClick={() =>
+                          selectBranch(branch.id, { toggle: true })
+                        }
+                        className="flex w-full items-center justify-between gap-3 text-left cursor-pointer"
+                      >
+                        <span className="min-w-0">
+                          <span className="mb-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-bold uppercase tracking-wider text-emerald-700">
+                            <span>{branch.town}</span>
+                            {km !== undefined && (
+                              <span className="font-semibold normal-case tracking-normal text-stone-500">
+                                {formatKm(km)} away
+                              </span>
+                            )}
+                            {isNearest && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-sky-800">
+                                <LocateFixed className="h-3 w-3" /> Nearest
+                              </span>
+                            )}
+                            {branch.isHeadOffice && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-800">
+                                <Building2 className="h-3 w-3" /> Head Office
+                              </span>
+                            )}
+                          </span>
+                          <span className="block text-base font-bold text-stone-900 sm:text-lg">
+                            {branch.name}
+                          </span>
                         </span>
-                        <div className="flex flex-wrap justify-end gap-1.5">
-                          {isNearest && (
-                            <span className="inline-flex items-center gap-1 bg-sky-100 text-sky-800 text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wide">
-                              <LocateFixed className="w-3 h-3" /> Nearest to you
-                            </span>
-                          )}
-                          {branch.isHeadOffice && (
-                            <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wide">
-                              <Building2 className="w-3 h-3" /> Head Office
-                            </span>
-                          )}
-                        </div>
+                        <ChevronDown
+                          aria-hidden="true"
+                          className={`h-5 w-5 shrink-0 text-stone-500 transition-transform ${
+                            isActive ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+
+                      <div
+                        id={`branch-details-${branch.id}`}
+                        hidden={!isActive}
+                        className="mt-4 border-t border-stone-200 pt-4"
+                      >
+                        {branch.address || branch.phone || branch.hours ? (
+                          <address className="mb-4 space-y-3 not-italic">
+                            {branch.address && (
+                              <div className="flex items-start gap-3 text-sm text-stone-600">
+                                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-stone-400" />
+                                <span>{branch.address}</span>
+                              </div>
+                            )}
+                            {branch.phone && (
+                              <div className="flex items-center gap-3 text-sm text-stone-600">
+                                <Phone className="h-4 w-4 shrink-0 text-stone-400" />
+                                <a
+                                  href={`tel:${branch.phone.replace(/\s+/g, "")}`}
+                                  className="hover:text-emerald-700 hover:underline"
+                                >
+                                  {branch.phone}
+                                </a>
+                              </div>
+                            )}
+                            {branch.hours && (
+                              <div className="flex items-start gap-3 text-sm text-stone-600">
+                                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-stone-400" />
+                                <span>{branch.hours}</span>
+                              </div>
+                            )}
+                          </address>
+                        ) : (
+                          <p className="mb-4 text-sm text-stone-500">
+                            Address and contact details are not listed yet.
+                          </p>
+                        )}
+
+                        {branch.phone && branch.address && (
+                          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                            <a
+                              href={`tel:${branch.phone.replace(/\s+/g, "")}`}
+                              className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs font-bold text-stone-700 transition-colors hover:bg-stone-50 hover:text-stone-900 sm:text-sm"
+                            >
+                              <Phone className="h-4 w-4" />
+                              Call Branch
+                            </a>
+                            <a
+                              href={directionsUrl(branch)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-emerald-800 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-emerald-900 sm:text-sm"
+                            >
+                              <Navigation className="h-4 w-4" />
+                              Get Directions
+                            </a>
+                          </div>
+                        )}
                       </div>
-
-                      <h3 className="text-xl font-bold text-stone-900 mb-4">
-                        {branch.name}
-                      </h3>
-
-                      {/* Contact Information */}
-                      {branch.address || branch.phone || branch.hours ? (
-                        <address className="not-italic space-y-3 mb-6">
-                          {branch.address && (
-                            <div className="flex items-start gap-3 text-sm text-stone-600">
-                              <MapPin className="w-4 h-4 text-stone-400 mt-0.5 shrink-0" />
-                              <span>{branch.address}</span>
-                            </div>
-                          )}
-                          {branch.phone && (
-                            <div className="flex items-center gap-3 text-sm text-stone-600">
-                              <Phone className="w-4 h-4 text-stone-400 shrink-0" />
-                              <a
-                                href={`tel:${branch.phone.replace(/\s+/g, "")}`}
-                                onClick={(e) => e.stopPropagation()}
-                                className="hover:text-emerald-700 hover:underline"
-                              >
-                                {branch.phone}
-                              </a>
-                            </div>
-                          )}
-                          {branch.hours && (
-                            <div className="flex items-start gap-3 text-sm text-stone-600">
-                              <Clock className="w-4 h-4 text-stone-400 mt-0.5 shrink-0" />
-                              <span>{branch.hours}</span>
-                            </div>
-                          )}
-                        </address>
-                      ) : (
-                        <p className="mb-6 text-sm text-stone-500">
-                          Address and contact details are not listed yet.
-                        </p>
-                      )}
-
-                      {/* Actions */}
-                      {branch.phone && branch.address && (
-                        <div className="grid grid-cols-2 gap-3">
-                          <a
-                            href={`tel:${branch.phone.replace(/\s+/g, "")}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex min-h-11 items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 hover:text-stone-900 text-sm font-bold transition-colors"
-                          >
-                            <Phone className="w-4 h-4" />
-                            Call Branch
-                          </a>
-                          <a
-                            href={directionsUrl(branch)}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex min-h-11 items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-800 text-white hover:bg-emerald-900 text-sm font-bold transition-colors"
-                          >
-                            <Navigation className="w-4 h-4" />
-                            Get Directions
-                          </a>
-                        </div>
-                      )}
                     </div>
                   );
                 })
               )}
             </div>
+            {visibleBranches.length > 5 && (
+              <button
+                type="button"
+                onClick={() => setShowAllBranches((showing) => !showing)}
+                className="mt-3 min-h-11 w-full rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-bold text-emerald-800 transition-colors hover:bg-stone-100 lg:mt-4"
+              >
+                {showAllBranches
+                  ? "Show fewer branches"
+                  : `Show all ${visibleBranches.length} branches`}
+              </button>
+            )}
           </div>
         </div>
       </div>
