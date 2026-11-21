@@ -254,6 +254,7 @@ function MapController({ activeBranch, points, userPos, fitWithUser }) {
 
 export default function BranchSection() {
   const [activeBranchId, setActiveBranchId] = useState(null);
+  const [expandedBranchId, setExpandedBranchId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All Locations");
   const [showAllBranches, setShowAllBranches] = useState(false);
@@ -310,7 +311,9 @@ export default function BranchSection() {
 
   const selectBranch = (id, { toggle = false } = {}) => {
     setFitWithUser(false);
-    setActiveBranchId((current) => (toggle && current === id ? null : id));
+    const nextId = toggle && activeBranchId === id ? null : id;
+    setActiveBranchId(nextId);
+    setExpandedBranchId(nextId);
   };
 
   useEffect(() => {
@@ -368,6 +371,7 @@ export default function BranchSection() {
         setUserPos(here);
         setNearestId(nearest.branch.id);
         setActiveBranchId(nearest.branch.id);
+        setExpandedBranchId(nearest.branch.id);
         setFitWithUser(true);
         setShowAllBranches(false);
       },
@@ -437,6 +441,7 @@ export default function BranchSection() {
                   onClick={() => {
                     setSelectedFilter(option);
                     setActiveBranchId(null);
+                    setExpandedBranchId(null);
                     setFitWithUser(false);
                     setShowAllBranches(false);
                   }}
@@ -651,7 +656,7 @@ export default function BranchSection() {
                 </div>
               ) : (
                 displayedBranches.map((branch) => {
-                  const isActive = activeBranchId === branch.id;
+                  const isExpanded = expandedBranchId === branch.id;
                   const isNearest = userPos && nearestId === branch.id;
                   const km = distances[branch.id];
 
@@ -660,17 +665,19 @@ export default function BranchSection() {
                       key={branch.id}
                       ref={(el) => (cardRefs.current[branch.id] = el)}
                       className={`p-3.5 sm:p-4 rounded-xl border transition-all duration-300 ${
-                        isActive
+                        isExpanded
                           ? "border-emerald-500 bg-emerald-50/30 ring-4 ring-emerald-500/10 shadow-md"
                           : "border-stone-200 bg-white hover:border-emerald-300 hover:shadow-sm"
                       }`}
                     >
                       <button
                         type="button"
-                        aria-expanded={isActive}
+                        aria-expanded={isExpanded}
                         aria-controls={`branch-details-${branch.id}`}
                         onClick={() =>
-                          selectBranch(branch.id, { toggle: true })
+                          setExpandedBranchId((current) =>
+                            current === branch.id ? null : branch.id,
+                          )
                         }
                         className="flex w-full items-center justify-between gap-3 text-left cursor-pointer"
                       >
@@ -700,14 +707,14 @@ export default function BranchSection() {
                         <ChevronDown
                           aria-hidden="true"
                           className={`h-5 w-5 shrink-0 text-stone-500 transition-transform ${
-                            isActive ? "rotate-180" : ""
+                            isExpanded ? "rotate-180" : ""
                           }`}
                         />
                       </button>
 
                       <div
                         id={`branch-details-${branch.id}`}
-                        hidden={!isActive}
+                        hidden={!isExpanded}
                         className="mt-4 border-t border-stone-200 pt-4"
                       >
                         {branch.address || branch.phone || branch.hours ? (
